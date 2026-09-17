@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Praveen Store - Quality products at affordable prices">
+
+    <title>Praveen Store | Online Shopping</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="navbar">
+
+    <div class="logo">
+        <span class="logo-icon">🛒</span>
+        <span>Praveen Store</span>
+    </div>
+
+    <nav>
+        <a href="/">
+            <i class="fa-solid fa-house"></i>
+            Home
+        </a>
+
+        <a href="/products">
+            <i class="fa-solid fa-box"></i>
+            Products
+        </a>
+
+        <a href="#cart">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Cart
+        </a>
+    </nav>
+
+</header>
+
+
+<!-- ================= FLASH MESSAGES ================= -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div class="flash-container">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message {{ category }}">
+
+                    {% if category == "success" %}
+                        <i class="fa-solid fa-circle-check"></i>
+                    {% else %}
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                    {% endif %}
+
+                    {{ message }}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+{% endwith %}
+
+
+<!-- ================= HERO SECTION ================= -->
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-text">
+
+            <span class="hero-badge">
+                ✨ Welcome to our store
+            </span>
+
+            <h1>
+                Shop Smart.
+                <span>Live Better.</span>
+            </h1>
+
+            <p>
+                Discover quality electronics and accessories
+                at prices you'll love.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="#products" class="primary-button">
+                    Shop Now
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+                <a href="#about" class="secondary-button">
+                    Learn More
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-visual">
+
+            <div class="hero-circle">
+
+                <div class="hero-product">
+                    💻
+                </div>
+
+            </div>
+
+            <div class="floating-card card-one">
+                ⭐ 4.9 Rating
+            </div>
+
+            <div class="floating-card card-two">
+                🚚 Fast Delivery
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FEATURES ================= -->
+
+<section class="features">
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            <i class="fa-solid fa-truck-fast"></i>
+        </div>
+
+        <div>
+            <h3>Fast Delivery</h3>
+            <p>Quick and reliable delivery</p>
+        </div>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <div>
+            <h3>Secure Shopping</h3>
+            <p>Your shopping experience matters</p>
+        </div>
+
+    </div>
+
+
+    <div class="feature">
+
+        <div class="feature-icon">
+            <i class="fa-solid fa-headset"></i>
+        </div>
+
+        <div>
+            <h3>Customer Support</h3>
+            <p>We're here when you need us</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PRODUCTS ================= -->
+
+<section class="products" id="products">
+
+    <div class="section-heading">
+
+        <span>OUR COLLECTION</span>
+
+        <h2>Featured Products</h2>
+
+        <p>
+            Explore our selection of popular products.
+        </p>
+
+    </div>
+
+
+    <div class="product-container">
+
+        {% for product in products %}
+
+        <div class="product-card">
+
+            <div class="product-image">
+                {{ product.emoji }}
+            </div>
+
+
+            <div class="product-info">
+
+                <span class="product-category">
+                    Electronics
+                </span>
+
+                <h3>
+                    {{ product.name }}
+                </h3>
+
+                <p class="product-description">
+                    {{ product.description }}
+                </p>
+
+
+                <div class="product-bottom">
+
+                    <p class="price">
+                        ₹{{ "{:,}".format(product.price) }}
+                    </p>
+
+
+                    <form method="POST"
+                          action="{{ url_for('add_to_cart', product_name=product.name) }}">
+
+                        <button type="submit"
+                                class="cart-button"
+                                title="Add to cart">
+
+                            <i class="fa-solid fa-cart-plus"></i>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<!-- ================= ABOUT ================= -->
+
+<section class="about" id="about">
+
+    <div class="about-content">
+
+        <div class="about-icon">
+            🛍️
+        </div>
+
+        <div>
+
+            <span>WHY PRAVEEN STORE?</span>
+
+            <h2>
+                Simple shopping.
+                Quality products.
+            </h2>
+
+            <p>
+                We aim to make online shopping simple,
+                convenient and enjoyable by providing
+                quality products at affordable prices.
+            </p>
+
+            <a href="#products" class="primary-button">
+                Explore Products
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <div class="footer-content">
+
+        <div class="footer-brand">
+
+            <h2>🛒 Praveen Store</h2>
+
+            <p>
+                Quality products at affordable prices.
+            </p>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <h3>Quick Links</h3>
+
+            <a href="/">Home</a>
+            <a href="#products">Products</a>
+            <a href="#about">About</a>
+
+        </div>
+
+
+        <div class="footer-social">
+
+            <h3>Follow Us</h3>
+
+            <div class="social-icons">
+
+                <a href="#" aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="#" aria-label="Facebook">
+                    <i class="fa-brands fa-facebook"></i>
+                </a>
+
+                <a href="#" aria-label="Twitter">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 Praveen Store. All rights reserved.
+        </p>
+
+    </div>
+
+</footer>
+
+
+</body>
+</html>
