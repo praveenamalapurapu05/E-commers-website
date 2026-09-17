@@ -1,94 +1,332 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
+
+
+# ==========================================
+# FLASK APPLICATION
+# ==========================================
 
 app = Flask(__name__)
 
-# Secret key is required for flash messages
 app.secret_key = "praveen-store-secret-key"
 
+# Database configuration
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///praveen_store.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Product data
-products = [
-    {
-        "name": "Laptop",
-        "price": 55000,
-        "emoji": "💻",
-        "description": "Powerful laptop for work, study and entertainment."
-    },
-    {
-        "name": "Smartphone",
-        "price": 25000,
-        "emoji": "📱",
-        "description": "Modern smartphone with powerful features."
-    },
-    {
-        "name": "Headphones",
-        "price": 2500,
-        "emoji": "🎧",
-        "description": "Enjoy clear and immersive sound anywhere."
-    },
-    {
-        "name": "Smart Watch",
-        "price": 4000,
-        "emoji": "⌚",
-        "description": "Track your fitness and stay connected."
-    }
-]
+db = SQLAlchemy(app)
 
 
-# Home page
+# ==========================================
+# PRODUCT DATABASE MODEL
+# ==========================================
+
+class Product(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String(100), nullable=False)
+
+    price = db.Column(db.Float, nullable=False)
+
+    emoji = db.Column(db.String(10), nullable=False)
+
+    description = db.Column(db.Text, nullable=False)
+
+    stock = db.Column(db.Integer, default=10)
+
+
+# ==========================================
+# CREATE DATABASE + DEFAULT PRODUCTS
+# ==========================================
+
+with app.app_context():
+
+    db.create_all()
+
+    if Product.query.count() == 0:
+
+        products = [
+
+            Product(
+                name="Laptop",
+                price=55000,
+                emoji="💻",
+                description="Powerful laptop for work, study and entertainment.",
+                stock=10
+            ),
+
+            Product(
+                name="Smartphone",
+                price=25000,
+                emoji="📱",
+                description="Modern smartphone with powerful features.",
+                stock=15
+            ),
+
+            Product(
+                name="Headphones",
+                price=2500,
+                emoji="🎧",
+                description="Enjoy clear and immersive sound anywhere.",
+                stock=20
+            ),
+
+            Product(
+                name="Smart Watch",
+                price=4000,
+                emoji="⌚",
+                description="Track your fitness and stay connected.",
+                stock=12
+            )
+
+        ]
+
+        db.session.add_all(products)
+        db.session.commit()
+
+
+# ==========================================
+# HOME PAGE
+# ==========================================
+
 @app.route("/")
 def home():
-    return render_template("index.html", products=products)
+
+    products = Product.query.all()
+
+    cart = session.get("cart", {})
+
+    cart_count = sum(cart.values())
+
+    return render_template(
+        "index.html",
+        products=products,
+        cart_count=cart_count
+    )
 
 
-# Products page
+# ==========================================
+# PRODUCTS PAGE
+# ==========================================
+
 @app.route("/products")
-def product_page():
-    return render_template("index.html", products=products)
+def products():
+
+    product_list = Product.query.all()
+
+    cart = session.get("cart", {})
+
+    cart_count = sum(cart.values())
+
+    return render_template(
+        "index.html",
+        products=product_list,
+        cart_count=cart_count
+    )
 
 
-# Add product to cart
-@app.route("/add-to-cart/<product_name>", methods=["POST"])
-def add_to_cart(product_name):
+# ==========================================
+# ADD PRODUCT TO CART
+# ==========================================
 
-    selected_product = None
+@app.route("/add-to-cart/<int:product_id>")
+def add_to_cart(product_id):
 
-    for product in products:
-        if product["name"] == product_name:
-            selected_product = product
-            break
+    product = db.session.get(Product, product_id)
 
-    if selected_product:
-        flash(
-            f"{selected_product['name']} has been added to your cart! 🛒",
-            "success"
-        )
-    else:
+    if product is None:
+
         flash("Product not found.", "error")
+
+        return redirect(url_for("home"))
+
+    if product.stock <= 0:
+
+        flash(
+            f"{product.name} is currently out of stock.",
+            "error"
+        )
+
+        return redirect(url_for("home"))
+
+    cart = session.get("cart", {})
+
+    product_id = str(product_id)
+
+    current_quantity = cart.get(product_id, 0)
+
+    if current_quantity >= product.stock:
+
+        flash(
+            f"Only {product.stock} units of {product.name} are available.",
+            "error"
+        )
+
+        return redirect(url_for("home"))
+
+    cart[product_id] = current_quantity + 1
+
+    session["cart"] = cart
+
+    flash(
+        f"{product.name} added to your cart! 🛒",
+        "success"
+    )
 
     return redirect(url_for("home"))
 
 
-# Error handling - Page not found
+# ==========================================
+# CART PAGE
+# ==========================================
+
+@app.route("/cart")
+def cart():
+
+    cart = session.get("cart", {})
+
+    cart_products = []
+
+    total = 0
+
+    cart_count = sum(cart.values())
+
+    for product_id, quantity in cart.items():
+
+        product = db.session.get(
+            Product,
+            int(product_id)
+        )
+
+        if product:
+
+            subtotal = product.price * quantity
+
+            cart_products.append({
+                "product": product,
+                "quantity": quantity,
+                "subtotal": subtotal
+            })
+
+            total += subtotal
+
+    return render_template(
+        "cart.html",
+        cart_products=cart_products,
+        total=total,
+        cart_count=cart_count
+    )
+
+
+# ==========================================
+# INCREASE QUANTITY
+# ==========================================
+
+@app.route("/cart/increase/<int:product_id>")
+def increase_quantity(product_id):
+
+    product = db.session.get(Product, product_id)
+
+    if product is None:
+
+        flash("Product not found.", "error")
+
+        return redirect(url_for("cart"))
+
+    cart = session.get("cart", {})
+
+    product_id = str(product_id)
+
+    current_quantity = cart.get(product_id, 0)
+
+    if current_quantity < product.stock:
+
+        cart[product_id] = current_quantity + 1
+
+        session["cart"] = cart
+
+    else:
+
+        flash(
+            f"Only {product.stock} units available.",
+            "error"
+        )
+
+    return redirect(url_for("cart"))
+
+
+# ==========================================
+# DECREASE QUANTITY
+# ==========================================
+
+@app.route("/cart/decrease/<int:product_id>")
+def decrease_quantity(product_id):
+
+    cart = session.get("cart", {})
+
+    product_id = str(product_id)
+
+    if product_id in cart:
+
+        if cart[product_id] > 1:
+
+            cart[product_id] -= 1
+
+        else:
+
+            del cart[product_id]
+
+        session["cart"] = cart
+
+    return redirect(url_for("cart"))
+
+
+# ==========================================
+# REMOVE PRODUCT
+# ==========================================
+
+@app.route("/cart/remove/<int:product_id>")
+def remove_from_cart(product_id):
+
+    cart = session.get("cart", {})
+
+    product_id = str(product_id)
+
+    if product_id in cart:
+
+        del cart[product_id]
+
+        session["cart"] = cart
+
+        flash(
+            "Product removed from your cart.",
+            "success"
+        )
+
+    return redirect(url_for("cart"))
+
+
+# ==========================================
+# 404 ERROR
+# ==========================================
+
 @app.errorhandler(404)
 def page_not_found(error):
-    return """
-    <h1>404 - Page Not Found</h1>
-    <p>The page you are looking for does not exist.</p>
-    <a href="/">Go back to Praveen Store</a>
-    """, 404
+
+    return render_template(
+        "index.html",
+        products=Product.query.all(),
+        cart_count=sum(
+            session.get("cart", {}).values()
+        )
+    ), 404
 
 
-# Error handling - Internal server error
-@app.errorhandler(500)
-def internal_server_error(error):
-    return """
-    <h1>500 - Server Error</h1>
-    <p>Something went wrong. Please try again later.</p>
-    <a href="/">Go back to Praveen Store</a>
-    """, 500
+# ==========================================
+# RUN APPLICATION
+# ==========================================
 
-
-# Run application
 if __name__ == "__main__":
+
     app.run(debug=True)

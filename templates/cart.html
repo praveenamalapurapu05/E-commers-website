@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Shopping Cart | Praveen Store</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<header class="navbar">
+
+    <div class="nav-container">
+
+        <a href="/" class="logo">
+            🛒 <span>Praveen Store</span>
+        </a>
+
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/products">
+                Products
+            </a>
+
+            <a href="/cart" class="cart-link">
+
+                🛒 Cart
+
+                {% if cart_count > 0 %}
+
+                <span class="cart-badge">
+                    {{ cart_count }}
+                </span>
+
+                {% endif %}
+
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<!-- FLASH MESSAGES -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div class="flash-container">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message {{ category }}">
+
+                    {{ message }}
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+{% endwith %}
+
+
+<!-- CART -->
+
+<section class="cart-page">
+
+
+    <div class="section-heading">
+
+        <span>
+            SHOPPING CART
+        </span>
+
+        <h1>
+            Your Cart
+        </h1>
+
+        <p>
+            Review your selected products before checkout.
+        </p>
+
+    </div>
+
+
+    {% if cart_products %}
+
+
+    <div class="cart-layout">
+
+
+        <!-- CART ITEMS -->
+
+        <div class="cart-items">
+
+
+            {% for item in cart_products %}
+
+
+            <div class="cart-item">
+
+
+                <div class="cart-product-image">
+
+                    {{ item.product.emoji }}
+
+                </div>
+
+
+                <div class="cart-product-info">
+
+                    <h3>
+                        {{ item.product.name }}
+                    </h3>
+
+                    <p>
+                        {{ item.product.description }}
+                    </p>
+
+                    <strong>
+                        ₹{{ "{:,.0f}".format(item.product.price) }}
+                    </strong>
+
+                </div>
+
+
+                <!-- QUANTITY -->
+
+                <div class="quantity-box">
+
+                    <a href="{{ url_for('decrease_quantity', product_id=item.product.id) }}">
+                        −
+                    </a>
+
+                    <span>
+                        {{ item.quantity }}
+                    </span>
+
+                    <a href="{{ url_for('increase_quantity', product_id=item.product.id) }}">
+                        +
+                    </a>
+
+                </div>
+
+
+                <!-- SUBTOTAL -->
+
+                <div class="cart-subtotal">
+
+                    ₹{{ "{:,.0f}".format(item.subtotal) }}
+
+                </div>
+
+
+                <!-- REMOVE -->
+
+                <a href="{{ url_for('remove_from_cart', product_id=item.product.id) }}"
+                   class="remove-button">
+
+                    Remove
+
+                </a>
+
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+        <!-- ORDER SUMMARY -->
+
+        <div class="order-summary">
+
+            <h2>
+                Order Summary
+            </h2>
+
+
+            <div class="summary-row">
+
+                <span>
+                    Items
+                </span>
+
+                <span>
+                    {{ cart_count }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span>
+                    Subtotal
+                </span>
+
+                <span>
+                    ₹{{ "{:,.0f}".format(total) }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-row">
+
+                <span>
+                    Delivery
+                </span>
+
+                <span class="free">
+                    FREE
+                </span>
+
+            </div>
+
+
+            <hr>
+
+
+            <div class="summary-total">
+
+                <span>
+                    Total
+                </span>
+
+                <strong>
+                    ₹{{ "{:,.0f}".format(total) }}
+                </strong>
+
+            </div>
+
+
+            <button class="checkout-button">
+
+                Proceed to Checkout →
+
+            </button>
+
+
+            <a href="/" class="continue-shopping">
+
+                ← Continue Shopping
+
+            </a>
+
+        </div>
+
+
+    </div>
+
+
+    {% else %}
+
+
+    <!-- EMPTY CART -->
+
+    <div class="empty-cart">
+
+        <div class="empty-cart-icon">
+            🛒
+        </div>
+
+        <h2>
+            Your Cart is Empty
+        </h2>
+
+        <p>
+            You haven't added any products yet.
+        </p>
+
+        <a href="/" class="primary-button">
+            Start Shopping →
+        </a>
+
+    </div>
+
+
+    {% endif %}
+
+
+</section>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <div class="footer-bottom">
+
+        © 2026 Praveen Store. All rights reserved.
+
+    </div>
+
+</footer>
+
+
+</body>
+
+</html>
