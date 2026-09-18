@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -312,8 +312,79 @@ def checkout():
 @app.route("/place-order", methods=["POST"])
 def place_order():
 
-    return "Place Order route is working!"
+    cart = session.get("cart", {})
 
+    if not cart:
+
+        flash(
+            "Your cart is empty.",
+            "error"
+        )
+
+        return redirect(url_for("home"))
+
+    customer_name = request.form.get("customer_name")
+    customer_email = request.form.get("customer_email")
+    customer_phone = request.form.get("customer_phone")
+    customer_address = request.form.get("customer_address")
+
+    total = 0
+
+    for product_id, quantity in cart.items():
+
+        product = db.session.get(
+            Product,
+            int(product_id)
+        )
+
+        if product:
+
+            total += product.price * quantity
+
+    order = Order(
+        customer_name=customer_name,
+        customer_email=customer_email,
+        customer_phone=customer_phone,
+        customer_address=customer_address,
+        total_amount=total,
+        status="Pending"
+    )
+    db.session.add(order)
+
+    db.session.commit()
+
+    session.pop("cart", None)
+
+    return redirect(
+        url_for(
+            "order_confirmation",
+            order_id=order.id
+        )
+    )
+
+
+# ==========================================
+# ORDER CONFIRMATION
+# ==========================================
+
+@app.route("/order-confirmation/<int:order_id>")
+def order_confirmation(order_id):
+
+    order = db.session.get(Order, order_id)
+
+    if order is None:
+
+        flash(
+            "Order not found.",
+            "error"
+        )
+
+        return redirect(url_for("home"))
+
+    return render_template(
+        "order_confirmation.html",
+        order=order
+    )
 # ==========================================
 # INCREASE QUANTITY
 # ==========================================

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Order Confirmed | Praveen Store</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================
+     NAVBAR
+========================================== -->
+
+<header class="navbar">
+
+    <div class="nav-container">
+
+        <a href="/" class="logo">
+            🛒 <span>Praveen Store</span>
+        </a>
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/products">
+                Products
+            </a>
+
+            <a href="/cart">
+                🛒 Cart
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<!-- ==========================================
+     ORDER CONFIRMATION
+========================================== -->
+
+<main class="order-confirmation-page">
+
+
+    <!-- SUCCESS BANNER -->
+
+    <section class="confirmation-banner">
+
+        <div class="confirmation-check">
+            ✓
+        </div>
+
+        <div class="confirmation-banner-text">
+
+            <span>
+                ORDER CONFIRMED
+            </span>
+
+            <h1>
+                Order Confirmed!
+            </h1>
+
+            <p>
+                Thank you, {{ order.customer_name }}!
+            </p>
+
+            <small>
+                Your order has been successfully placed.
+                We'll process it shortly and keep you updated.
+            </small>
+
+        </div>
+
+        <div class="confirmation-package">
+            📦
+        </div>
+
+    </section>
+
+
+    <!-- MAIN CONTENT -->
+
+    <section class="confirmation-grid">
+
+
+        <!-- LEFT COLUMN -->
+
+        <div class="confirmation-left">
+
+
+            <!-- ORDER DETAILS -->
+
+            <div class="confirmation-card">
+
+                <div class="card-heading">
+
+                    <div class="heading-icon">
+                        📄
+                    </div>
+
+                    <h2>
+                        Order Details
+                    </h2>
+
+                </div>
+
+
+                <div class="order-detail-list">
+
+
+                    <div class="order-detail-row">
+
+                        <span>
+                            Order ID
+                        </span>
+
+                        <strong>
+                            #{{ order.id }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="order-detail-row">
+
+                        <span>
+                            Order Status
+                        </span>
+
+                        <strong class="status-pending">
+                            🕐 {{ order.status }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="order-detail-row">
+
+                        <span>
+                            Total Amount
+                        </span>
+
+                        <strong class="total-green">
+                            ₹{{ "{:,.0f}".format(order.total_amount) }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="order-detail-row">
+
+                        <span>
+                            Email
+                        </span>
+
+                        <strong>
+                            {{ order.customer_email }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="order-detail-row">
+
+                        <span>
+                            Phone
+                        </span>
+
+                        <strong>
+                            {{ order.customer_phone }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="order-detail-row address-detail">
+
+                        <span>
+                            Delivery Address
+                        </span>
+
+                        <strong>
+                            {{ order.customer_address }}
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTION BUTTONS -->
+
+            <div class="confirmation-actions">
+
+
+                <a href="/" class="confirmation-primary">
+
+                    🛒
+                    Continue Shopping
+
+                </a>
+
+
+                <a href="/products" class="confirmation-secondary">
+
+                    ☷
+                    View Products
+
+                </a>
+
+
+                <a href="/" class="confirmation-secondary">
+
+                    ⌂
+                    Go to Home
+
+                </a>
+
+
+            </div>
+
+
+            <!-- ORDER INFORMATION -->
+
+            <div class="items-card">
+
+                <div class="card-heading">
+
+                    <div class="heading-icon">
+                        📦
+                    </div>
+
+                    <h2>
+                        Your Order
+                    </h2>
+
+                </div>
+
+
+                <div class="order-summary-item">
+
+                    <div class="summary-item-icon">
+                        🛍️
+                    </div>
+
+
+                    <div class="summary-item-content">
+
+                        <strong>
+                            Order #{{ order.id }}
+                        </strong>
+
+                        <span>
+                            Your order has been received successfully.
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-item-price">
+
+                        ₹{{ "{:,.0f}".format(order.total_amount) }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- HELP BANNER -->
+
+            <div class="help-banner">
+
+                <div class="help-icon">
+                    ✉️
+                </div>
+
+                <div class="help-content">
+
+                    <strong>
+                        Order information
+                    </strong>
+
+                    <p>
+                        Your order details have been saved successfully.
+                        Keep your Order ID <strong>#{{ order.id }}</strong>
+                        for future reference.
+                    </p>
+
+                </div>
+
+
+                <a href="/" class="help-button">
+                    Need Help?
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- RIGHT COLUMN -->
+
+        <aside class="next-steps-card">
+
+
+            <div class="next-heading">
+
+                <span class="truck-icon">
+                    🚚
+                </span>
+
+                <h2>
+                    What's Next?
+                </h2>
+
+            </div>
+
+
+            <div class="timeline">
+
+
+                <!-- STEP 1 -->
+
+                <div class="timeline-step active">
+
+                    <div class="timeline-marker">
+                        ✓
+                    </div>
+
+                    <div class="timeline-content">
+
+                        <strong>
+                            Order Placed
+                        </strong>
+
+                        <p>
+                            We have received your order.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STEP 2 -->
+
+                <div class="timeline-step">
+
+                    <div class="timeline-marker">
+                    </div>
+
+                    <div class="timeline-content">
+
+                        <strong>
+                            Processing
+                        </strong>
+
+                        <p>
+                            We are preparing your order.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STEP 3 -->
+
+                <div class="timeline-step">
+
+                    <div class="timeline-marker">
+                    </div>
+
+                    <div class="timeline-content">
+
+                        <strong>
+                            Shipped
+                        </strong>
+
+                        <p>
+                            You'll get tracking details soon.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STEP 4 -->
+
+                <div class="timeline-step">
+
+                    <div class="timeline-marker">
+                    </div>
+
+                    <div class="timeline-content">
+
+                        <strong>
+                            Out for Delivery
+                        </strong>
+
+                        <p>
+                            Your order is on the way.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STEP 5 -->
+
+                <div class="timeline-step last">
+
+                    <div class="timeline-marker">
+                    </div>
+
+                    <div class="timeline-content">
+
+                        <strong>
+                            Delivered
+                        </strong>
+
+                        <p>
+                            Enjoy your purchase!
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </aside>
+
+
+    </section>
+
+
+</main>
+
+
+<!-- ==========================================
+     FOOTER
+========================================== -->
+
+<footer>
+
+    <div class="footer-bottom">
+
+        © 2026 Praveen Store. All rights reserved.
+
+    </div>
+
+</footer>
+
+
+</body>
+
+</html>
