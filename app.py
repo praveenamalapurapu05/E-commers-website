@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 
@@ -8,7 +10,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-app.secret_key = "praveen-store-secret-key"
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "dev-secret-key-for-local-testing"
+)
 
 # Database configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///praveen_store.db"
