@@ -257,33 +257,37 @@
                 </div>
 
 
-                <div class="order-summary-item">
+                {% for item in order_items %}
 
-                    <div class="summary-item-icon">
-                        🛍️
-                    </div>
+<div class="order-summary-item">
 
+    <div class="summary-item-icon">
+        🛍️
+    </div>
 
-                    <div class="summary-item-content">
+    <div class="summary-item-content">
 
-                        <strong>
-                            Order #{{ order.id }}
-                        </strong>
+        <strong>
+            {{ item.product_name }}
+        </strong>
 
-                        <span>
-                            Your order has been received successfully.
-                        </span>
+        <span>
+            Qty: {{ item.quantity }}
+            ×
+            ₹{{ "{:,.0f}".format(item.price) }}
+        </span>
 
-                    </div>
+    </div>
 
+    <div class="summary-item-price">
 
-                    <div class="summary-item-price">
+        ₹{{ "{:,.0f}".format(item.subtotal) }}
 
-                        ₹{{ "{:,.0f}".format(order.total_amount) }}
+    </div>
 
-                    </div>
+</div>
 
-                </div>
+{% endfor %}
 
             </div>
 

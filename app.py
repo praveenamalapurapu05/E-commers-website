@@ -72,7 +72,47 @@ class Order(db.Model):
         default="Pending"
     )
 
+# ==========================================
+# ORDER ITEM DATABASE MODEL
+# ==========================================
 
+class OrderItem(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    order_id = db.Column(
+        db.Integer,
+        db.ForeignKey("order.id"),
+        nullable=False
+    )
+
+    product_id = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    product_name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    price = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    quantity = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    subtotal = db.Column(
+        db.Float,
+        nullable=False
+    )
 # ==========================================
 # CREATE DATABASE + DEFAULT PRODUCTS
 # ==========================================
@@ -330,6 +370,10 @@ def place_order():
 
     total = 0
 
+    cart_items = []
+
+    # Calculate total and collect products
+
     for product_id, quantity in cart.items():
 
         product = db.session.get(
@@ -339,7 +383,18 @@ def place_order():
 
         if product:
 
-            total += product.price * quantity
+            subtotal = product.price * quantity
+
+            total += subtotal
+
+            cart_items.append({
+                "product": product,
+                "quantity": quantity,
+                "subtotal": subtotal
+            })
+
+
+    # Create the main order
 
     order = Order(
         customer_name=customer_name,
@@ -349,11 +404,39 @@ def place_order():
         total_amount=total,
         status="Pending"
     )
+
     db.session.add(order)
+
+    db.session.flush()
+
+
+    # Create order items
+
+    for item in cart_items:
+
+        order_item = OrderItem(
+            order_id=order.id,
+            product_id=item["product"].id,
+            product_name=item["product"].name,
+            price=item["product"].price,
+            quantity=item["quantity"],
+            subtotal=item["subtotal"]
+        )
+
+        db.session.add(order_item)
+
+
+    # Save everything
 
     db.session.commit()
 
+
+    # Clear cart
+
     session.pop("cart", None)
+
+
+    # Go to confirmation page
 
     return redirect(
         url_for(
@@ -362,7 +445,6 @@ def place_order():
         )
     )
 
-
 # ==========================================
 # ORDER CONFIRMATION
 # ==========================================
@@ -370,7 +452,10 @@ def place_order():
 @app.route("/order-confirmation/<int:order_id>")
 def order_confirmation(order_id):
 
-    order = db.session.get(Order, order_id)
+    order = db.session.get(
+        Order,
+        order_id
+    )
 
     if order is None:
 
@@ -381,9 +466,14 @@ def order_confirmation(order_id):
 
         return redirect(url_for("home"))
 
+    order_items = OrderItem.query.filter_by(
+        order_id=order.id
+    ).all()
+
     return render_template(
         "order_confirmation.html",
-        order=order
+        order=order,
+        order_items=order_items
     )
 # ==========================================
 # INCREASE QUANTITY
