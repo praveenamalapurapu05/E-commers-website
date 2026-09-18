@@ -34,6 +34,43 @@ class Product(db.Model):
     description = db.Column(db.Text, nullable=False)
 
     stock = db.Column(db.Integer, default=10)
+# ==========================================
+# ORDER DATABASE MODEL
+# ==========================================
+
+class Order(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    customer_name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    customer_email = db.Column(
+        db.String(120),
+        nullable=False
+    )
+
+    customer_phone = db.Column(
+        db.String(20),
+        nullable=False
+    )
+
+    customer_address = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    total_amount = db.Column(
+        db.Float,
+        nullable=False
+    )
+
+    status = db.Column(
+        db.String(30),
+        default="Pending"
+    )
 
 
 # ==========================================
@@ -218,6 +255,64 @@ def cart():
         cart_count=cart_count
     )
 
+# ==========================================
+# CHECKOUT PAGE
+# ==========================================
+
+@app.route("/checkout")
+def checkout():
+
+    cart = session.get("cart", {})
+
+    if not cart:
+
+        flash(
+            "Your cart is empty.",
+            "error"
+        )
+
+        return redirect(url_for("home"))
+
+    cart_products = []
+
+    total = 0
+
+    cart_count = sum(cart.values())
+
+    for product_id, quantity in cart.items():
+
+        product = db.session.get(
+            Product,
+            int(product_id)
+        )
+
+        if product:
+
+            subtotal = product.price * quantity
+
+            cart_products.append({
+                "product": product,
+                "quantity": quantity,
+                "subtotal": subtotal
+            })
+
+            total += subtotal
+
+    return render_template(
+        "checkout.html",
+        cart_products=cart_products,
+        total=total,
+        cart_count=cart_count
+    )
+
+# ==========================================
+# PLACE ORDER
+# ==========================================
+
+@app.route("/place-order", methods=["POST"])
+def place_order():
+
+    return "Place Order route is working!"
 
 # ==========================================
 # INCREASE QUANTITY
